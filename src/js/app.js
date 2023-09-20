@@ -1,55 +1,114 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-let scene, camera, renderer, controls, dynamicTexture, glb,mesh, inputElement;
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+
+
+let scene, camera, renderer, controls, dynamicTexture, envMap;
+let header;
+let stones = [];
 let manager = new THREE.LoadingManager;
 let sceneloader = new GLTFLoader(manager);
+let hdriloader = new RGBELoader(manager);
+const input = document.querySelector('#text')
+const enterButton = document.querySelector('.button')
+let texts = ['New Commandments'];
+let lineWidth = 500;
+let loader = new FontLoader();
+let monarch;
+loader.load('fonts/Monarch_Regular.json', function(font){
+  monarch = font;
+} );
+
+
 manager.onLoad = function (){
-  init();
+  godswork();
   render();
 };
-sceneloader.load("mesh/cube_UV.glb", function(gltf){
+sceneloader.load("mesh/stone.glb", function(gltf){
   gltf.scene.traverse((child) => {
-    glb = child
+    if (child.name == "stone_head"){
+      header = child;
+    }else{
+      stones.push(child)
+    }
   })
 });
-function updateCanvas(text) {
-    const canvas = dynamicTexture.image;
-    const context = canvas.getContext("2d");
-    context.fillStyle = "white";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.font = "40px Arial";
-    context.fillStyle = "red";
-    context.fillText(text, 10, 50);
-    dynamicTexture.needsUpdate = true;
+hdriloader.load('images/hdri_01.hdr', function(hdri) {
+  envMap = hdri;
+  envMap.mapping = THREE.EquirectangularReflectionMapping
+
+  
+});
+
+
+function updateCanvas(textsArr) {
+  const canvas = dynamicTexture.image;
+  const context = canvas.getContext("2d");
+  context.fillStyle = "white";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.font = '50px monarch';
+  context.fillStyle = "grey";
+  dynamicTexture.needsUpdate = true;
+  let nextLineX  = 300;
+  let lineHeight = 60;
+  let wholeString = ''
+
+  textsArr.forEach((item,index)=>{
+    wholeString += item + " ";
+    wrapText(context, wholeString, nextLineX, lineHeight) 
+  })  
+  
 }
-function init() {
+
+function wrapText(context, text, x, y){
+  let words = text.split(' ');
+  let line = '';
+
+  words.forEach((word, key)=>{
+    let testLine = line + words[key] + ' ';
+    let metrics = context.measureText(testLine);
+    let testWidth = metrics.width;
+    if(testWidth > lineWidth && key > 0){
+      context.fillText(line, x, y);
+      line = words[key] + ' ';
+      //line height
+      y += 80;
+    } else {
+      line = testLine
+    }
+    context.fillText(line, x, y);
+  })
+}
+function godswork() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 5;
-    renderer = new THREE.WebGLRenderer();
+    camera.position.z = 1.5;
+    renderer = new THREE.WebGLRenderer({canvas: document.querySelector(".canvas"), antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    scene.environment = envMap;
+
+    window.addEventListener("resize", onWindowResize);
+  
     controls = new OrbitControls( camera, renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(1);
+
     const canvas = document.createElement("canvas");
-    canvas.width = 512;
-    canvas.height = 512;
+    canvas.width = 1024;
+    canvas.height = 1024;
     dynamicTexture = new THREE.CanvasTexture(canvas);
-    const material = new THREE.MeshBasicMaterial({ map: dynamicTexture });
-    // const geometry = new THREE.BoxGeometry();
-    // mesh = new THREE.Mesh(geometry, material);
-    glb.material = material;
-    scene.add(glb);
-    inputElement = document.createElement("input");
-    inputElement.type = "text";
-    inputElement.placeholder = "Type something...";
-    document.body.appendChild(inputElement);
-    inputElement.addEventListener("input", function () {
-        const userInput = inputElement.value;
-        updateCanvas(userInput);
-        console.log("input")
-    });
-    updateCanvas("canka!");
+    const material = new THREE.MeshPhysicalMaterial({ map: dynamicTexture, side:  THREE.DoubleSide, bumpMap: dynamicTexture, bumpScale: 0.008});
+
+    header.material = material;
+
+    const nextstone = stones[1];
+    nextstone.material = material;
+    nextstone.position.y = -1;
+
+    scene.add(header, nextstone, ambientLight);
+    updateCanvas(texts)
 }
 function render() {
     requestAnimationFrame(render);
@@ -60,5 +119,13 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
-window.addEventListener("resize", onWindowResize);
+
+enterButton.addEventListener('click', onButtonClick)
+
+function onButtonClick(event){
+  if(input.value){
+    texts.unshift(input.value);
+    updateCanvas(texts)
+  }
+}
 

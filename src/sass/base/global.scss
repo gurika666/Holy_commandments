@@ -14,63 +14,34 @@ html {
   overflow: hidden;
 }
 
-.loader{
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100svh;
-  background-color: var(--color-firefly);
-  font-size: css-clamp(30px, 40px);
-  color: var(--color-white);
-  
-  &:not(&.loading){
-    opacity: 0;
-    transition: opacity 0.5s linear;
-    pointer-events: none;
-  }
-}
-.ball {
+.form{
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-40%);
-  width: 120px; height: 120px;
-  padding: 6px;
-  border-radius: 100%;
-  box-shadow: inset 0 0 20px -5px #fff, inset 0 -40px 40px -20px #fff;
-}
-.ball:before {
-  position: absolute;
-  content: '';
-  width: 40%; height: 25%;
-  top: 20px; left: 10px;
-  background: rgba(255,255,255,0.1); border-radius: 100%;
-}
-.wave {
-  width: 100%; height: 100%;
-  border-radius: 100%;
-  background: url(https://i.imgur.com/uFpLbYt.png);
-  animation: wave-animation 1s infinite linear, loading-animation 4s linear alternate;
-  background-size: 200px 100px;
-  background-repeat: repeat-x;
-}
-.delay {
-  animation-delay: 0.3s;
+  top: 5%;
+  left: 5%;
+  color: var(--color-black);
+  background-color: var(--color-white);
+  padding: 20px;
 }
 
-@-webkit-keyframes wave-animation {
-  0% {background-position: 0 bottom;}
-  100% {background-position: 200px bottom;}
+
+#text{
+  height: 60px;
+  width: 100%;
+  font-size: 24px;
+  border: 1px solid var(--color-black);
+  padding-left: 10px;
 }
-@keyframes wave-animation {
-  0% {background-position: 0 bottom;}
-  100% {background-position: 200px bottom;}
-}
-@-webkit-keyframes loading-animation {
-  0% {background-size: 200px 0px;}
-  100% {background-size: 200px 200px;}
-}
-@keyframes loading-animation {
-  0% {background-size: 200px 0px;}
-  100% {background-size: 200px 200px;}
+
+.button{
+  margin-left: 10px;
+  font-size: 25px;
+  border: 1px solid var(--button-hover,var(--color-black));
+  background-color: var(--button-bg,var(--color-transparent));;
+  padding:0 10px;
+  color: var(--button-color, var(--color-black));
+  @include default-transitions(background-color, color);
+  &:hover{
+    --button-bg: var(--color-black);
+    --button-color: var(--color-white)
+  }
 }

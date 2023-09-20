@@ -9,3 +9,13 @@
       font-url("#{$name}.svg##{$name}") format("svg");
   }
 }
+
+
+@font-face {
+  font-family: 'monarch';
+  src: font-url("Monarch.eot") format("embedded-opentype"),
+    font-url("Monarch.woff2") format("woff2"),
+    font-url("Monarch.woff") format("woff"),
+    font-url("Monarch.ttf") format("truetype"),
+    font-url("Monarch.svg#Monarch") format("svg");
+}
