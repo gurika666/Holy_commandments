@@ -53,34 +53,12 @@ function updateCanvas(textsArr) {
   dynamicTexture.needsUpdate = true;
   let nextLineX  = 300;
   let lineHeight = 60;
-  let wholeString = ''
 
   textsArr.forEach((item,index)=>{
-    wholeString += item + " ";
-    wrapText(context, wholeString, nextLineX, lineHeight) 
+    context.fillText(textsArr[index], nextLineX, lineHeight + (index *  lineHeight));
   })  
-  
 }
 
-function wrapText(context, text, x, y){
-  let words = text.split(' ');
-  let line = '';
-
-  words.forEach((word, key)=>{
-    let testLine = line + words[key] + ' ';
-    let metrics = context.measureText(testLine);
-    let testWidth = metrics.width;
-    if(testWidth > lineWidth && key > 0){
-      context.fillText(line, x, y);
-      line = words[key] + ' ';
-      //line height
-      y += 80;
-    } else {
-      line = testLine
-    }
-    context.fillText(line, x, y);
-  })
-}
 function godswork() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
